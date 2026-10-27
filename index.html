@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOXEL File Management</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="header-content">
+            <div class="brand">
+                <img src="logo.png" alt="VFM Logo" class="logo-img">
+                <div class="brand-text">
+                    <h1>VOXEL <span>File Management</span></h1>
+                </div>
+            </div>
+            <div class="header-stats" id="header-stats"></div>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <aside class="form-section glass-panel">
+            <div class="section-title">
+                <i class="fa-solid fa-plus-circle text-green"></i>
+                <h2>ثبت کار جدید</h2>
+            </div>
+            
+            <form id="add-task-form">
+                <div class="input-group">
+                    <label><i class="fa-solid fa-heading"></i> عنوان کار</label>
+                    <input type="text" id="task-title" placeholder="مثلا: طراحی پروژه کار و فناوری">
+                </div>
+                <div class="input-group">
+                    <label><i class="fa-solid fa-align-right"></i> توضیحات</label>
+                    <textarea id="task-desc" rows="3" placeholder="جزئیات کار..."></textarea>
+                </div>
+                <div class="row">
+                    <div class="input-group">
+                        <label><i class="fa-regular fa-calendar-plus"></i> تاریخ شروع</label>
+                        <input type="date" id="task-start">
+                    </div>
+                    <div class="input-group">
+                        <label><i class="fa-regular fa-calendar-check"></i> تاریخ پایان</label>
+                        <input type="date" id="task-end">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-group">
+                        <label><i class="fa-solid fa-folder"></i> دسته‌بندی</label>
+                        <input type="text" id="task-category" placeholder="درسی، شخصی...">
+                    </div>
+                    <div class="input-group">
+                        <label><i class="fa-solid fa-flag"></i> اولویت</label>
+                        <select id="task-priority">
+                            <option value="بالا">بالا</option>
+                            <option value="متوسط" selected>متوسط</option>
+                            <option value="پایین">پایین</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label><i class="fa-solid fa-chart-line"></i> میزان پیشرفت</label>
+                    <select id="task-progress">
+                        <option value="شروع">شروع</option>
+                        <option value="اول">اول</option>
+                        <option value="وسط" selected>وسط</option>
+                        <option value="آخر">آخر</option>
+                        <option value="به پایان رسیده">به پایان رسیده</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <!-- این دکمه با id مشخص شده تا جاوااسکریپت آن را پیدا کند -->
+                    <button type="button" id="btn-submit-add" class="btn btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i> ثبت کار
+                    </button>
+                </div>
+            </form>
+        </aside>
+        <section class="list-section glass-panel">
+            <div class="list-header">
+                <div class="section-title">
+                    <i class="fa-solid fa-list-check text-green"></i>
+                    <h2>لیست پروژه‌ها</h2>
+                </div>
+                <div class="tools-bar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="search-input" placeholder="جستجوی نام کار...">
+                    </div>
+                    <div class="filters">
+                        <select id="filter-status">
+                            <option value="all">همه وضعیت‌ها</option>
+                            <option value="در جریان">در جریان</option>
+                            <option value="به پایان رسیده">به پایان رسیده</option>
+                        </select>
+                        <select id="filter-priority">
+                            <option value="all">همه اولویت‌ها</option>
+                            <option value="بالا">بالا</option>
+                            <option value="متوسط">متوسط</option>
+                            <option value="پایین">پایین</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div id="tasks-container" class="tasks-grid"></div>
+            <div id="empty-message" class="empty-state hidden">
+                <i class="fa-regular fa-folder-open"></i>
+                <p>هیچ کاری یافت نشد.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <p>ساخته شده توسط <strong>VOXEL Studio</strong> &copy; 2024</p>
+    </footer>
+
+    <div class="modal-overlay" id="view-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-eye text-green"></i> جزئیات کار</h3>
+                <button class="btn-close" onclick="closeModal('view-modal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="view-modal-body"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('view-modal')">بستن</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-pen-to-square text-green"></i> ویرایش کار</h3>
+                <button class="btn-close" onclick="closeModal('edit-modal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-task-form">
+                    <input type="hidden" id="edit-task-id">
+                    <div class="input-group">
+                        <label>عنوان کار</label>
+                        <input type="text" id="edit-title">
+                    </div>
+                    <div class="input-group">
+                        <label>توضیحات</label>
+                        <textarea id="edit-desc" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="input-group">
+                            <label>تاریخ شروع</label>
+                            <input type="date" id="edit-start">
+                        </div>
+                        <div class="input-group">
+                            <label>تاریخ پایان</label>
+                            <input type="date" id="edit-end">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-group">
+                            <label>دسته‌بندی</label>
+                            <input type="text" id="edit-category">
+                            </div>
+                        <div class="input-group">
+                            <label>اولویت</label>
+                            <select id="edit-priority">
+                                <option value="بالا">بالا</option>
+                                <option value="متوسط">متوسط</option>
+                                <option value="پایین">پایین</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>میزان پیشرفت</label>
+                        <select id="edit-progress">
+                            <option value="شروع">شروع</option>
+                            <option value="اول">اول</option>
+                            <option value="وسط">وسط</option>
+                            <option value="آخر">آخر</option>
+                            <option value="به پایان رسیده">به پایان رسیده</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer" style="padding: 15px 0 0 0; border: none;">
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> ذخیره تغییرات</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
